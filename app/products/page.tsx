@@ -41,12 +41,6 @@ export default function ProductsPage() {
     setEditId(null); // إعادة تعيين editId بعد الحفظ
   };
 
-  // دالة البيع: تخزين id المنتج في localStorage والانتقال لصفحة تسجيل البيع
-  const handleSell = (productId: string) => {
-    localStorage.setItem("saleProductId", productId); // تخزين المنتج للبيع
-    router.push("/sales/create"); // الانتقال لصفحة تسجيل البيع
-  };
-
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
       {/* عنوان الصفحة */}
@@ -152,13 +146,7 @@ export default function ProductsPage() {
                       >
                         حذف
                       </button>
-                      {/* زر البيع */}
-                      <button
-                        onClick={() => handleSell(product._id!)}
-                        className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 transition"
-                      >
-                        بيع
-                      </button>
+                    
                     </td>
                   </>
                 )}

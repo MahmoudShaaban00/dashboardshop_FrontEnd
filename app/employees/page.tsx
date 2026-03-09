@@ -27,7 +27,7 @@ export default function Employees() {
   // دالة لتسجيل الحضور
   const handleRecordAttendance = (empId: string) => {
     localStorage.setItem("attendance_employee_id", empId);
-    router.push("/attendance/create");
+    router.push("createAttendance");
   };
 
   return (

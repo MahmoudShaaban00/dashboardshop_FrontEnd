@@ -53,9 +53,9 @@ export default function AttendancePage() {
             <tr className="bg-gray-800 text-white">
               <th className="px-4 py-3 text-left">الموظف</th>
               <th className="px-4 py-3 text-left">التاريخ</th>
-              <th className="px-4 py-3 text-left hidden md:table-cell">الراتب</th>
+              <th className="px-4 py-3 text-left ">الراتب</th>
               <th className="px-4 py-3 text-left">خصم الغياب</th>
-              <th className="px-4 py-3 text-left hidden md:table-cell">الراتب بعد الخصم</th>
+              <th className="px-4 py-3 text-left">الراتب بعد الخصم</th>
               <th className="px-4 py-3 text-center">الإجراءات</th>
             </tr>
           </thead>
@@ -83,7 +83,7 @@ export default function AttendancePage() {
                   </td>
 
                   {/* الراتب الأصلي */}
-                  <td className="px-4 py-3 hidden md:table-cell">
+                  <td className="px-4 py-3">
                     ${salary}
                   </td>
 
@@ -97,7 +97,7 @@ export default function AttendancePage() {
                   </td>
 
                   {/* الراتب بعد الخصم */}
-                  <td className="px-4 py-3 hidden md:table-cell text-green-700 font-bold">
+                  <td className="px-4 py-3  text-green-700 font-bold">
                     ${salaryAfterDeduction}
                   </td>
 

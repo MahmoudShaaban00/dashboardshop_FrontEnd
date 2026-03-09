@@ -53,13 +53,13 @@ export default function Login() {
 
       <div className="absolute inset-0 bg-black/50 -z-10"></div>
 
-      <div className="bg-white/10 backdrop-blur-lg p-10 rounded-2xl shadow-2xl w-[400px] border border-white/20">
+      <div className="bg-white/10 backdrop-blur-lg p-10 mx-2 rounded-2xl shadow-2xl w-[400px] border border-white/20">
 
         <h2 className="text-3xl font-bold text-white text-center mb-6">
           مرحباً بعودتك 👋
         </h2>
 
-        <form onSubmit={formik.handleSubmit} className="flex flex-col gap-4">
+        <form onSubmit={formik.handleSubmit} className="flex flex-col gap-4 ">
 
           <div>
             <label className="text-white">البريد الإلكتروني</label>

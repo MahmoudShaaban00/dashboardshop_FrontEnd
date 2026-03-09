@@ -1,24 +1,22 @@
-// components/protectedRoute.tsx
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // جلب التوكن من localStorage
     const token = localStorage.getItem("token");
 
-    if (!token) {
-      // إذا لا يوجد توكن، إعادة التوجيه لصفحة login
+    if (!token && pathname !== "/login") {
       router.push("/login");
     } else {
-      setLoading(false); // إذا يوجد توكن، إظهار المحتوى
+      setLoading(false);
     }
-  }, [router]);
+  }, [router, pathname]);
 
   if (loading) {
     return (
@@ -28,6 +26,5 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
     );
   }
 
-  // إظهار المكون فقط إذا هناك توكن
   return <>{children}</>;
 }

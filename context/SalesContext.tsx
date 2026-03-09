@@ -50,6 +50,7 @@ export const SalesProvider = ({ children }: { children: ReactNode }) => {
         getAxiosConfig()
       );
       setSales(data); // البيانات المفترض أنها DailySales
+      console.log
     } catch (error) {
       console.error(error);
       setMessage("❌ خطأ أثناء جلب المبيعات");

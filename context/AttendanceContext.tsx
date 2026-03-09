@@ -30,7 +30,6 @@ export const AttendanceProvider = ({ children }: { children: ReactNode }) => {
       // هنا نتحقق من وجود المصفوفة داخل data.data
       setAttendanceList(Array.isArray(data.data) ? data.data : []);
       setMessage(data.message || "");
-      console.log(data)
     } catch (err) {
       console.error(err);
       setMessage("❌ حدث خطأ أثناء جلب الحضور");
