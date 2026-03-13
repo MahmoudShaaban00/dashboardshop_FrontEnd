@@ -39,6 +39,7 @@ export default function Login() {
 
         // التحويل للصفحة
         router.push("/home")
+        
                 setTimeout(() => {
   window.location.reload();
 }, 1000);

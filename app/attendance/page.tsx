@@ -12,10 +12,15 @@ export default function AttendancePage() {
   const [status, setStatus] = useState<"present" | "absent">("present");
   const [deduction, setDeduction] = useState(0);
 
+  // Type guard للتحقق من أن employee كائن
+  const isEmployeeObject = (emp: any): emp is { _id: string; name: string; email: string; salary: number } => {
+    return emp && typeof emp === "object" && "salary" in emp && "name" in emp;
+  };
+
   // عند الضغط على تعديل، نملأ الحقول بالقيم الحالية
   const startEdit = (att: Attendance) => {
     setEditingId(att._id ?? null);
-    setDate(att.date ?? "");
+    setDate(att.date?.split("T")[0] ?? "");
     setStatus(att.status ?? "present");
     setDeduction(att.deduction ?? 0);
   };
@@ -62,57 +67,85 @@ export default function AttendancePage() {
 
           <tbody>
             {attendanceList.map((att, idx) => {
-              // حساب الراتب بعد الخصم
-              const salary = typeof att.employee === "object" ? att.employee.salary : 0;
-              const salaryAfterDeduction = salary - (att.deduction || 0);
+              // حساب الراتب بعد الخصم بأمان
+              const salary = isEmployeeObject(att.employee) ? att.employee.salary : 0;
+              const salaryAfterDeduction = salary - (att.deduction ?? 0);
 
               return (
                 <tr key={att._id ?? idx} className="border-b hover:bg-gray-50">
                   {/* اسم الموظف */}
                   <td className="px-4 py-3">
-                    {typeof att.employee === "object" ? att.employee.name : att.employee}
+                    {isEmployeeObject(att.employee) ? att.employee.name : att.employee ?? "غير معروف"}
                   </td>
 
                   {/* التاريخ */}
                   <td className="px-4 py-3">
                     {editingId === att._id ? (
-                      <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="border p-1 rounded w-full" />
+                      <input
+                        type="date"
+                        value={date}
+                        onChange={(e) => setDate(e.target.value)}
+                        className="border p-1 rounded w-full"
+                      />
                     ) : (
                       att.date?.split("T")[0] ?? ""
                     )}
                   </td>
 
                   {/* الراتب الأصلي */}
-                  <td className="px-4 py-3">
-                    ${salary}
-                  </td>
+                  <td className="px-4 py-3">${salary}</td>
 
                   {/* الخصم */}
                   <td className="px-4 py-3">
                     {editingId === att._id ? (
-                      <input type="number" value={deduction} onChange={(e) => setDeduction(Number(e.target.value))} className="border p-1 rounded w-20" />
+                      <input
+                        type="number"
+                        value={deduction}
+                        onChange={(e) => setDeduction(Number(e.target.value))}
+                        className="border p-1 rounded w-20"
+                      />
                     ) : (
                       att.deduction ?? 0
                     )}
                   </td>
 
                   {/* الراتب بعد الخصم */}
-                  <td className="px-4 py-3  text-green-700 font-bold">
+                  <td className="px-4 py-3 text-green-700 font-bold">
                     ${salaryAfterDeduction}
                   </td>
 
-                  {/* الإجراءات مع أزرار responsive */}
+                  {/* الإجراءات */}
                   <td className="px-4 py-3 text-center">
                     <div className="flex flex-wrap justify-center gap-2">
                       {editingId === att._id ? (
                         <>
-                          <button onClick={handleUpdate} className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition">حفظ</button>
-                          <button onClick={() => setEditingId(null)} className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600 transition">إلغاء</button>
+                          <button
+                            onClick={handleUpdate}
+                            className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition"
+                          >
+                            حفظ
+                          </button>
+                          <button
+                            onClick={() => setEditingId(null)}
+                            className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600 transition"
+                          >
+                            إلغاء
+                          </button>
                         </>
                       ) : (
                         <>
-                          <button onClick={() => startEdit(att)} className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition">تعديل</button>
-                          <button onClick={() => att._id && deleteAttendance(att._id)} className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition">حذف</button>
+                          <button
+                            onClick={() => startEdit(att)}
+                            className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition"
+                          >
+                            تعديل
+                          </button>
+                          <button
+                            onClick={() => att._id && deleteAttendance(att._id)}
+                            className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition"
+                          >
+                            حذف
+                          </button>
                         </>
                       )}
                     </div>
