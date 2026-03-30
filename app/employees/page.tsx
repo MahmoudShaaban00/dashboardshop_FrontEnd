@@ -1,18 +1,25 @@
 "use client";
 
 import { useState } from "react";
-import { useEmployees } from "@/context/EmployeesContext";
+import { useEmployees } from "@/hooks/useEmployees";
 import { useRouter } from "next/navigation";
 
+type Employee = {
+  _id: string;
+  name: string;
+  email: string;
+  salary: number;
+};
+
 export default function Employees() {
-  const { employees, deleteEmployee, updateEmployee } = useEmployees();
+  const { employees, removeEmployee, editEmployee } = useEmployees();
   const router = useRouter();
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [salary, setSalary] = useState<number>(0);
 
-  const startEdit = (emp: any) => {
+  const startEdit = (emp: Employee) => {
     setEditingId(emp._id);
     setName(emp.name);
     setSalary(emp.salary);
@@ -20,14 +27,18 @@ export default function Employees() {
 
   const handleUpdate = async () => {
     if (!editingId) return;
-    await updateEmployee(editingId, { name, salary });
+
+    await editEmployee({
+      id: editingId,
+      updatedData: { name, salary },
+    });
+
     setEditingId(null);
   };
 
-  // دالة لتسجيل الحضور
   const handleRecordAttendance = (empId: string) => {
     localStorage.setItem("attendance_employee_id", empId);
-    router.push("createAttendance");
+    router.push("/createAttendance");
   };
 
   return (
@@ -35,7 +46,6 @@ export default function Employees() {
       <div className="max-w-6xl mx-auto bg-white shadow-lg rounded-xl p-4">
         <h1 className="text-2xl font-bold mb-4 text-center">الموظفون</h1>
 
-        {/* جعل الجدول متجاوب باستخدام overflow-x-auto */}
         <div className="overflow-x-auto">
           <table className="w-full min-w-[600px] table-auto">
             <thead>
@@ -50,7 +60,7 @@ export default function Employees() {
             </thead>
 
             <tbody>
-              {employees.map((emp) => (
+              {employees.map((emp: Employee) => (
                 <tr key={emp._id} className="border-b hover:bg-gray-50">
                   <td className="px-4 py-3">
                     {editingId === emp._id ? (
@@ -74,27 +84,29 @@ export default function Employees() {
                         type="number"
                         className="border p-1 rounded w-full"
                         value={salary}
-                        onChange={(e) => setSalary(Number(e.target.value))}
+                        onChange={(e) =>
+                          setSalary(Number(e.target.value))
+                        }
                       />
                     ) : (
                       `$${emp.salary}`
                     )}
                   </td>
 
-                  {/* خلية الأزرار: استخدام flex + flex-wrap لتصبح responsive */}
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap justify-center gap-2">
                       {editingId === emp._id ? (
                         <>
                           <button
                             onClick={handleUpdate}
-                            className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition"
+                            className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
                           >
                             حفظ
                           </button>
+
                           <button
                             onClick={() => setEditingId(null)}
-                            className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600 transition"
+                            className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600"
                           >
                             إلغاء
                           </button>
@@ -103,19 +115,23 @@ export default function Employees() {
                         <>
                           <button
                             onClick={() => startEdit(emp)}
-                            className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition"
+                            className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
                           >
                             تعديل
                           </button>
+
                           <button
-                            onClick={() => deleteEmployee(emp._id)}
-                            className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition"
+                            onClick={() => removeEmployee(emp._id)}
+                            className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
                           >
                             حذف
                           </button>
+
                           <button
-                            onClick={() => handleRecordAttendance(emp._id)}
-                            className="bg-purple-500 text-white px-3 py-1 rounded hover:bg-purple-600 transition"
+                            onClick={() =>
+                              handleRecordAttendance(emp._id)
+                            }
+                            className="bg-purple-500 text-white px-3 py-1 rounded hover:bg-purple-600"
                           >
                             تسجيل الغياب
                           </button>

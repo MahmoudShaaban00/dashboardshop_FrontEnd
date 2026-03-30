@@ -47,7 +47,7 @@ export interface AttendanceContextType {
 
 // Types/types.ts
 export interface Product {
-  _id?: string;
+  _id: string;
   name: string;
   description?: string;
   price: number;

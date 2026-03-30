@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useProduct } from "@/context/ProductContext";
+import { useCreateProduct } from "@/hooks/useProducts";
 import { useRouter } from "next/navigation";
+import { Product } from "@/Types/types";
 
 export default function CreateProductPage() {
   const router = useRouter();
-  const { createProduct, loading, message } = useProduct();
+  const createProduct = useCreateProduct();
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -15,29 +16,28 @@ export default function CreateProductPage() {
   const [size, setSize] = useState("");
   const [color, setColor] = useState("");
   const [barcode, setBarcode] = useState("");
+  const [message, setMessage] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    await createProduct({
-      name,
-      description,
-      price: Number(price),
-      stock: Number(stock),
-      size,
-      color,
-      barcode,
-    });
-
-    setName("");
-    setDescription("");
-    setPrice("");
-    setStock("");
-    setSize("");
-    setColor("");
-    setBarcode("");
-
-    router.push("/products");
+    createProduct.mutate(
+      { name, description, price: Number(price), stock: Number(stock), size, color, barcode },
+      {
+        onSuccess: () => {
+          setMessage("✅ تم إضافة المنتج بنجاح");
+          setName("");
+          setDescription("");
+          setPrice("");
+          setStock("");
+          setSize("");
+          setColor("");
+          setBarcode("");
+          router.push("/products");
+        },
+        onError: () => setMessage("❌ حدث خطأ أثناء إنشاء المنتج"),
+      }
+    );
   };
 
   return (
@@ -46,106 +46,75 @@ export default function CreateProductPage() {
         onSubmit={handleSubmit}
         className="bg-white w-full max-w-3xl rounded-3xl shadow-2xl p-10 space-y-6 border"
       >
-        <h1 className="text-3xl font-bold text-center text-gray-800">
-          إضافة منتج جديد
-        </h1>
+        <h1 className="text-3xl font-bold text-center text-gray-800">إضافة منتج جديد</h1>
 
         {message && (
-          <div className="bg-green-100 text-green-700 p-3 rounded-lg text-center">
+          <div
+            className={`p-3 rounded-lg text-center ${
+              message.startsWith("✅") ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+            }`}
+          >
             {message}
           </div>
         )}
 
-        {/* Grid Inputs */}
         <div className="grid md:grid-cols-2 gap-5">
-          <div>
-            <label className="block mb-1 font-medium">اسم المنتج</label>
-            <input
-              type="text"
-              placeholder="ادخل اسم المنتج"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="input"
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1 font-medium">الوصف</label>
-            <input
-              type="text"
-              placeholder="ادخل وصف المنتج"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="input"
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1 font-medium">السعر</label>
-            <input
-              type="number"
-              placeholder="ادخل السعر"
-              value={price}
-              onChange={(e) =>
-                setPrice(e.target.value === "" ? "" : Number(e.target.value))
-              }
-              className="input"
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1 font-medium">الكمية</label>
-            <input
-              type="number"
-              placeholder="ادخل الكمية"
-              value={stock}
-              onChange={(e) =>
-                setStock(e.target.value === "" ? "" : Number(e.target.value))
-              }
-              className="input"
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1 font-medium">المقاس</label>
-            <input
-              type="text"
-              placeholder="M / L / XL"
-              value={size}
-              onChange={(e) => setSize(e.target.value)}
-              className="input"
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1 font-medium">اللون</label>
-            <input
-              type="text"
-              placeholder="Red / Blue"
-              value={color}
-              onChange={(e) => setColor(e.target.value)}
-              className="input"
-            />
-          </div>
-
-          <div className="md:col-span-2">
-            <label className="block mb-1 font-medium">الباركود</label>
-            <input
-              type="text"
-              placeholder="ادخل الباركود"
-              value={barcode}
-              onChange={(e) => setBarcode(e.target.value)}
-              className="input"
-            />
-          </div>
+          <input
+            placeholder="اسم المنتج"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="input"
+            required
+          />
+          <input
+            placeholder="الوصف"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="input"
+            required
+          />
+          <input
+            type="number"
+            placeholder="السعر"
+            value={price}
+            onChange={(e) => setPrice(e.target.value === "" ? "" : Number(e.target.value))}
+            className="input"
+            required
+          />
+          <input
+            type="number"
+            placeholder="الكمية"
+            value={stock}
+            onChange={(e) => setStock(e.target.value === "" ? "" : Number(e.target.value))}
+            className="input"
+            required
+          />
+          <input
+            placeholder="المقاس"
+            value={size}
+            onChange={(e) => setSize(e.target.value)}
+            className="input"
+          />
+          <input
+            placeholder="اللون"
+            value={color}
+            onChange={(e) => setColor(e.target.value)}
+            className="input"
+          />
+          <input
+            placeholder="الباركود"
+            value={barcode}
+            onChange={(e) => setBarcode(e.target.value)}
+            className="input md:col-span-2"
+          />
         </div>
 
         <button
           type="submit"
-          disabled={loading}
-          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-3 rounded-xl shadow-lg hover:scale-105 transition"
+          disabled={createProduct.isLoading}
+          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-3 rounded-xl shadow-lg hover:scale-105 transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? "جاري الحفظ..." : "إضافة المنتج"}
+          {createProduct.isLoading ? "جاري الحفظ..." : "إضافة المنتج"}
         </button>
       </form>
     </div>

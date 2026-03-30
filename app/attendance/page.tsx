@@ -1,163 +1,105 @@
 "use client";
 
-import { useAttendance } from "@/context/AttendanceContext";
 import { useState } from "react";
-import { Attendance } from "@/Types/types";
+import { useAttendance } from "@/hooks/useAttendance";
 
 export default function AttendancePage() {
-  const { attendanceList, loading, message, updateAttendance, deleteAttendance, createAttendance } = useAttendance();
+  const {
+    attendanceList,
+    loading,
+    updateAttendance,
+    deleteAttendance,
+  } = useAttendance();
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [date, setDate] = useState("");
-  const [status, setStatus] = useState<"present" | "absent">("present");
   const [deduction, setDeduction] = useState(0);
 
-  // Type guard للتحقق من أن employee كائن
-  const isEmployeeObject = (emp: any): emp is { _id: string; name: string; email: string; salary: number } => {
-    return emp && typeof emp === "object" && "salary" in emp && "name" in emp;
+  const startEdit = (att: any) => {
+    setEditingId(att._id);
+    setDate(att.date.split("T")[0]);
+    setDeduction(att.deduction || 0);
   };
 
-  // عند الضغط على تعديل، نملأ الحقول بالقيم الحالية
-  const startEdit = (att: Attendance) => {
-    setEditingId(att._id ?? null);
-    setDate(att.date?.split("T")[0] ?? "");
-    setStatus(att.status ?? "present");
-    setDeduction(att.deduction ?? 0);
-  };
-
-  // تحديث الحضور
   const handleUpdate = async () => {
     if (!editingId) return;
-    await updateAttendance(editingId, { date, status, deduction });
-    setEditingId(null);
-    setDate("");
-    setStatus("present");
-    setDeduction(0);
-  };
 
-  // إنشاء حضور جديد
-  const handleCreate = async (employeeId: string) => {
-    await createAttendance({
-      employee: employeeId,
-      date: new Date().toISOString().split("T")[0],
-      status: "present",
-      deduction: 0,
+    await updateAttendance({
+      id: editingId,
+      att: { date, deduction },
     });
+
+    setEditingId(null);
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <h1 className="text-3xl font-bold mb-6 text-center">الحضور</h1>
+    <div className="min-h-screen bg-gray-900 text-white p-6">
 
-      {message && <p className="text-center mb-4 text-sm font-medium text-gray-700">{message}</p>}
+      <h1 className="text-3xl text-center mb-6">📊 الحضور</h1>
 
-      {/* جدول مستجيب */}
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[700px] bg-white rounded-xl shadow-lg">
-          <thead>
-            <tr className="bg-gray-800 text-white">
-              <th className="px-4 py-3 text-left">الموظف</th>
-              <th className="px-4 py-3 text-left">التاريخ</th>
-              <th className="px-4 py-3 text-left ">الراتب</th>
-              <th className="px-4 py-3 text-left">خصم الغياب</th>
-              <th className="px-4 py-3 text-left">الراتب بعد الخصم</th>
-              <th className="px-4 py-3 text-center">الإجراءات</th>
-            </tr>
-          </thead>
+      <table className="w-full bg-white/10 rounded-xl overflow-hidden">
+        <thead className="bg-white/20">
+          <tr>
+            <th>الموظف</th>
+            <th>التاريخ</th>
+            <th>الراتب</th>
+            <th>الخصم</th>
+            <th>بعد الخصم</th>
+            <th>إجراءات</th>
+          </tr>
+        </thead>
 
-          <tbody>
-            {attendanceList.map((att, idx) => {
-              // حساب الراتب بعد الخصم بأمان
-              const salary = isEmployeeObject(att.employee) ? att.employee.salary : 0;
-              const salaryAfterDeduction = salary - (att.deduction ?? 0);
+        <tbody>
+          {attendanceList.map((att: any) => {
+            const salary = att.employee?.salary || 0;
+            const finalSalary = salary - (att.deduction || 0);
 
-              return (
-                <tr key={att._id ?? idx} className="border-b hover:bg-gray-50">
-                  {/* اسم الموظف */}
-                  <td className="px-4 py-3">
-                    {isEmployeeObject(att.employee) ? att.employee.name : att.employee ?? "غير معروف"}
-                  </td>
+            return (
+              <tr key={att._id} className="text-center border-b border-white/10">
 
-                  {/* التاريخ */}
-                  <td className="px-4 py-3">
-                    {editingId === att._id ? (
-                      <input
-                        type="date"
-                        value={date}
-                        onChange={(e) => setDate(e.target.value)}
-                        className="border p-1 rounded w-full"
-                      />
-                    ) : (
-                      att.date?.split("T")[0] ?? ""
-                    )}
-                  </td>
+                <td>{att.employee?.name}</td>
 
-                  {/* الراتب الأصلي */}
-                  <td className="px-4 py-3">${salary}</td>
+                <td>
+                  {editingId === att._id ? (
+                    <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="input"/>
+                  ) : (
+                    att.date.split("T")[0]
+                  )}
+                </td>
 
-                  {/* الخصم */}
-                  <td className="px-4 py-3">
-                    {editingId === att._id ? (
-                      <input
-                        type="number"
-                        value={deduction}
-                        onChange={(e) => setDeduction(Number(e.target.value))}
-                        className="border p-1 rounded w-20"
-                      />
-                    ) : (
-                      att.deduction ?? 0
-                    )}
-                  </td>
+                <td>${salary}</td>
 
-                  {/* الراتب بعد الخصم */}
-                  <td className="px-4 py-3 text-green-700 font-bold">
-                    ${salaryAfterDeduction}
-                  </td>
+                <td>
+                  {editingId === att._id ? (
+                    <input type="number" value={deduction} onChange={(e) => setDeduction(+e.target.value)} className="input w-20"/>
+                  ) : (
+                    att.deduction
+                  )}
+                </td>
 
-                  {/* الإجراءات */}
-                  <td className="px-4 py-3 text-center">
-                    <div className="flex flex-wrap justify-center gap-2">
-                      {editingId === att._id ? (
-                        <>
-                          <button
-                            onClick={handleUpdate}
-                            className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition"
-                          >
-                            حفظ
-                          </button>
-                          <button
-                            onClick={() => setEditingId(null)}
-                            className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600 transition"
-                          >
-                            إلغاء
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <button
-                            onClick={() => startEdit(att)}
-                            className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition"
-                          >
-                            تعديل
-                          </button>
-                          <button
-                            onClick={() => att._id && deleteAttendance(att._id)}
-                            className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition"
-                          >
-                            حذف
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+                <td className="text-green-400 font-bold">${finalSalary}</td>
 
-      {loading && <p className="text-center mt-4 text-gray-500">جاري التحميل...</p>}
+                <td className="flex gap-2 justify-center p-2">
+                  {editingId === att._id ? (
+                    <>
+                      <button onClick={handleUpdate} className="btn bg-green-500">حفظ</button>
+                      <button onClick={() => setEditingId(null)} className="btn bg-gray-500">إلغاء</button>
+                    </>
+                  ) : (
+                    <>
+                      <button onClick={() => startEdit(att)} className="btn bg-blue-500">تعديل</button>
+                      <button onClick={() => deleteAttendance(att._id)} className="btn bg-red-500">حذف</button>
+                    </>
+                  )}
+                </td>
+
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+
+      {loading && <p className="text-center mt-4">⏳ Loading...</p>}
     </div>
   );
 }

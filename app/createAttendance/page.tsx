@@ -1,126 +1,75 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAttendance } from "@/context/AttendanceContext";
+import { useAttendance } from "@/hooks/useAttendance";
 import { useRouter } from "next/navigation";
 
 export default function CreateAttendancePage() {
   const router = useRouter();
-  const { createAttendance, loading, message } = useAttendance();
+  const { createAttendance, loading } = useAttendance();
 
   const [employeeId, setEmployeeId] = useState("");
   const [date, setDate] = useState("");
   const [status, setStatus] = useState<"present" | "absent">("present");
-  const [deduction, setDeduction] = useState<number>(0);
+  const [deduction, setDeduction] = useState(0);
 
-  // جلب employeeId من localStorage عند تحميل الصفحة
   useEffect(() => {
     const id = localStorage.getItem("attendance_employee_id");
-    if (id) {
-      setEmployeeId(id);
-    } else {
-      alert("Employee ID not found in localStorage");
-    }
+    if (id) setEmployeeId(id);
   }, []);
 
- const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  if (!employeeId || !date) {
-    alert("الرجاء التأكد من إدخال التاريخ ومعرف الموظف");
-    return;
-  }
+    if (!employeeId || !date) return alert("❌ البيانات ناقصة");
 
-  // التأكد من القيم قبل الإرسال
-  console.log({
-    employee: employeeId,
-    date,
-    status,
-    deduction: Number(deduction), // تحويل للقيمة الرقمية
-  });
+    await createAttendance({
+      employee: employeeId,
+      date,
+      status,
+      deduction,
+    });
 
-  await createAttendance({
-    employee: employeeId,
-    date,
-    status: status as "present" | "absent",
-    deduction: Number(deduction),
-  });
+    router.push("/attendance");
+  };
 
-  setDate("");
-  setStatus("present");
-  setDeduction(0);
-
-  router.push("/attendance");
-};
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-50 to-purple-50 p-4">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white w-full max-w-lg rounded-2xl shadow-2xl p-8 space-y-6 border border-gray-200"
-      >
-        <h1 className="text-3xl font-extrabold text-center text-gray-800 mb-4">
-          إضافة حضور
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800 text-white">
+      <form onSubmit={handleSubmit} className="glass-card w-full max-w-md">
+
+        <h1 className="text-2xl font-bold text-center mb-6">
+          ➕ إضافة حضور
         </h1>
 
-        {message && (
-          <p className="text-center text-sm text-gray-600 font-medium mb-3">
-            {message}
-          </p>
-        )}
+        <input
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          className="input"
+          required
+        />
 
-        {/* Date */}
-        <div>
-          <label className="block text-gray-700 font-semibold mb-1">
-            التاريخ
-          </label>
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
-            required
-          />
-        </div>
-
-        {/* Status */}
-        <div>
-          <label className="block text-gray-700 font-semibold mb-1">
-            الحالة
-          </label>
-          <select
-            value={status}
-            onChange={(e) =>
-              setStatus(e.target.value as "present" | "absent")
-            }
-            className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
-          >
-            <option value="present">حاضر ✅</option>
-            <option value="absent">غائب ❌</option>
-          </select>
-        </div>
-
-        {/* Deduction */}
-        <div>
-          <label className="block text-gray-700 font-semibold mb-1">
-            الخصم
-          </label>
-          <input
-            type="number"
-            placeholder="0"
-            value={deduction}
-            onChange={(e) => setDeduction(Number(e.target.value))}
-            className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
-          />
-        </div>
-
-        {/* Submit Button */}
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-3 rounded-xl shadow-lg hover:scale-105 transform transition duration-300 disabled:opacity-60"
+        <select
+          value={status}
+          onChange={(e) => setStatus(e.target.value as any)}
+          className="input"
         >
-          {loading ? "جاري الحفظ..." : "حفظ الحضور"}
+          <option value="present">حاضر</option>
+          <option value="absent">غائب</option>
+        </select>
+
+        <input
+          type="number"
+          value={deduction}
+          onChange={(e) => setDeduction(+e.target.value)}
+          className="input"
+          placeholder="الخصم"
+        />
+
+        <button className="btn w-full">
+          {loading ? "جاري الحفظ..." : "حفظ"}
         </button>
+
       </form>
     </div>
   );

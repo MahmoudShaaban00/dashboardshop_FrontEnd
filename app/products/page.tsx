@@ -1,19 +1,14 @@
 "use client";
 
-import { useProduct } from "@/context/ProductContext";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useProducts, useUpdateProduct, useDeleteProduct } from "@/hooks/useProducts";
 
 export default function ProductsPage() {
-  const router = useRouter();
+  const { data: productList = [], isLoading } = useProducts();
+  const updateProduct = useUpdateProduct();
+  const deleteProduct = useDeleteProduct();
 
-  // استدعاء سياق المنتجات للحصول على المنتجات والوظائف
-  const { productList, deleteProduct, updateProduct, loading } = useProduct();
-
-  // حالة لتحديد أي منتج يتم تعديله
   const [editId, setEditId] = useState<string | null>(null);
-
-  // حالة لتخزين بيانات النموذج عند التعديل
   const [form, setForm] = useState({
     name: "",
     price: 0,
@@ -22,7 +17,6 @@ export default function ProductsPage() {
     color: "",
   });
 
-  // دالة لتعبئة بيانات النموذج عند الضغط على "تعديل"
   const handleEdit = (product: any) => {
     setEditId(product._id);
     setForm({
@@ -34,19 +28,18 @@ export default function ProductsPage() {
     });
   };
 
-  // دالة لتحديث المنتج بعد التعديل
-  const handleUpdate = async () => {
-    if (!editId) return; // إذا لم يتم تحديد المنتج، لا نفعل شيء
-    await updateProduct(editId, form); // استدعاء دالة تحديث المنتج من الكونتكست
-    setEditId(null); // إعادة تعيين editId بعد الحفظ
+  const handleUpdate = () => {
+    if (!editId) return;
+    updateProduct.mutate(
+      { id: editId, prod: form },
+      { onSuccess: () => setEditId(null) }
+    );
   };
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
-      {/* عنوان الصفحة */}
       <h1 className="text-3xl font-bold mb-6 text-center">📦 المنتجات</h1>
 
-      {/* حاوية الجدول مع تمرير أفقي للشاشات الصغيرة */}
       <div className="overflow-x-auto bg-white shadow-xl rounded-xl">
         <table className="w-full min-w-[700px] text-center border-collapse">
           <thead className="bg-gray-200">
@@ -59,13 +52,9 @@ export default function ProductsPage() {
               <th className="p-3 border">العمليات</th>
             </tr>
           </thead>
-
           <tbody>
-            {/* عرض كل المنتجات */}
-            {productList.map((product, index) => (
-              <tr key={product._id || index} className="border-t">
-
-                {/* إذا كان هذا المنتج قيد التعديل */}
+            {productList.map((product) => (
+              <tr key={product._id} className="border-t">
                 {editId === product._id ? (
                   <>
                     <td className="p-2">
@@ -106,14 +95,12 @@ export default function ProductsPage() {
                       />
                     </td>
                     <td className="space-x-2 p-2 flex justify-center flex-wrap gap-2">
-                      {/* زر حفظ التعديلات */}
                       <button
                         onClick={handleUpdate}
                         className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition"
                       >
                         حفظ
                       </button>
-                      {/* زر إلغاء التعديل */}
                       <button
                         onClick={() => setEditId(null)}
                         className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600 transition"
@@ -124,29 +111,24 @@ export default function ProductsPage() {
                   </>
                 ) : (
                   <>
-                    {/* عرض بيانات المنتج العادية */}
                     <td className="p-3">{product.name}</td>
                     <td>{product.price}</td>
                     <td>{product.stock}</td>
                     <td>{product.size}</td>
                     <td>{product.color}</td>
-
                     <td className="space-x-2 p-2 flex justify-center flex-wrap gap-2">
-                      {/* زر تعديل */}
                       <button
                         onClick={() => handleEdit(product)}
                         className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition"
                       >
                         تعديل
                       </button>
-                      {/* زر حذف */}
                       <button
-                        onClick={() => deleteProduct(product._id!)}
+                        onClick={() => deleteProduct.mutate(product._id)}
                         className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition"
                       >
                         حذف
                       </button>
-                    
                     </td>
                   </>
                 )}
@@ -156,8 +138,7 @@ export default function ProductsPage() {
         </table>
       </div>
 
-      {/* عرض حالة التحميل */}
-      {loading && <p className="text-center mt-4 text-gray-500">جاري التحميل...</p>}
+      {isLoading && <p className="text-center mt-4 text-gray-500">جاري التحميل...</p>}
     </div>
   );
 }
