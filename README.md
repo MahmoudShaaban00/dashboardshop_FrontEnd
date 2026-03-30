@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+🛍️ Shop Management Dashboard
 
-## Getting Started
+A full-stack freelance project to manage a clothing shop, built with Next.js, NestJS, and TanStack Query. The system provides a dashboard to manage employees, products, and sales efficiently.
 
-First, run the development server:
+🧰 Tech Stack
+Frontend: Next.js 13 (App Router, TypeScript, Tailwind CSS)
+Backend: NestJS (TypeScript, REST API, PostgreSQL/MongoDB optional)
+State Management & Data Fetching: Custom React Hooks + TanStack Query (React Query v5)
+Authentication: JWT-based login
+Styling: Tailwind CSS
+Version Control: Git + GitHub
 
-```bash
+🚀 Features
+Dashboard
+Manage employees: create, update, delete, and view employees.
+Manage products: create, update, delete, and view products in stock.
+Track daily sales: record sales, calculate total revenue, and number of sales.
+Search and filter: easily filter products or employees by name, ID, or stock.
+Responsive UI: works on desktop and mobile screens.
+
+Custom Hooks
+All API interactions are abstracted into custom hooks for cleaner and reusable code.
+Hooks use TanStack Query for efficient data fetching, caching, and mutations.
+Example hooks:
+useProducts – fetch, update, delete products
+useEmployees – fetch, update, delete employees
+useSales – track daily sales and total revenue
+
+Freelance-ready
+Easy to deploy and extend for other shop types.
+/app                # Next.js frontend pages
+/components         # React components (Tables, Forms, Dashboard)
+/context            # React context for global state
+/hooks              # Custom hooks for API calls
+/api                # NestJS backend endpoints
+/types              # TypeScript types for frontend and backend
+
+🔧 Installation
+Frontend (Next.js)
+git clone <your-repo-url>
+cd frontend
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Backend (NestJS)
+cd backend
+npm install
+npm run start:dev
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+📈 Roadmap / Future Improvements
+Add role-based access (admin, manager, staff)
+Add analytics charts for sales trends
+Support multi-shop management
+Add Stripe integration for online payments
+Implement real-time notifications for stock updates
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+⚡ License
+This project is free to use for learning and freelance projects.
+Fully modular and maintainable.
+Can be adapted for multiple shops or different business domains.
+📁 Project Structure
